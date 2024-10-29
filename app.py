@@ -2,16 +2,30 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 import time
 
 app = Flask(__name__)
 
 # Załaduj dane z pliku `.env`
-load_dotenv("promob2b.env")
+load_dotenv()
 username = os.getenv("EPSTRYK_LOGIN")
 password = os.getenv("EPSTRYK_PASSWORD")
 
+# Funkcja inicjująca przeglądarkę Chrome w trybie headless
+def start_webdriver():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Uruchamia Chrome w trybie headless
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")  # Zwiększa stabilność w trybie headless
+    chrome_options.add_argument("--remote-debugging-port=9222")  # DevTools dla stabilności
+
+    # Inicjalizacja Chrome w trybie headless
+    driver = webdriver.Chrome(options=chrome_options)
+    return driver
+
+# Funkcja logowania do epstryk.pl
 def login_to_epstryk(driver):
     driver.get("https://epstryk.pl/pl/login")
     time.sleep(2)
@@ -22,6 +36,7 @@ def login_to_epstryk(driver):
     driver.find_element(By.NAME, "commit").click()
     time.sleep(2)  # Oczekiwanie na zalogowanie
 
+# Funkcja scrapująca dane produktu z epstryk.pl
 def scrape_product_data(driver, product_url):
     driver.get(product_url)
     time.sleep(2)
@@ -46,16 +61,18 @@ def index():
     if request.method == 'POST':
         product_url = request.form['product_url']
         
-        # Uruchom Selenium i pobierz dane
-        driver = webdriver.Chrome()
-        login_to_epstryk(driver)
-        product_data = scrape_product_data(driver, product_url)
-        driver.quit()
+        # Inicjalizacja Selenium i pobieranie danych
+        driver = start_webdriver()
+        try:
+            login_to_epstryk(driver)
+            product_data = scrape_product_data(driver, product_url)
+        finally:
+            driver.quit()
 
-        # Generowanie HTML
+        # Generowanie kodu HTML
         html_code = f"""
         <div class="product-card">
-            <img src="{product_data['image_url']}" alt="{product_data['name']}" />
+            <img src="{product_data['image_url']}" alt="{product_data['name']}">
             <h2>{product_data['name']}</h2>
             <p class="catalog-price"><s>{product_data['catalog_price']}</s></p>
             <p class="your-price" style="color: red; font-weight: bold;">{product_data['your_price']}</p>
@@ -68,4 +85,4 @@ def index():
     return render_template("index.html")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=10000)
