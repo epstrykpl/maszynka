@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
-import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 import time
 
 app = Flask(__name__)
@@ -11,17 +12,15 @@ load_dotenv()
 username = os.getenv("EPSTRYK_LOGIN")
 password = os.getenv("EPSTRYK_PASSWORD")
 
-# Funkcja inicjująca przeglądarkę Chrome w trybie headless
+# Funkcja inicjująca przeglądarkę Firefox w trybie headless
 def start_webdriver():
-    options = uc.ChromeOptions()
-    options.add_argument("--headless")  # Tryb headless
+    options = Options()
+    options.add_argument("--headless")  # Uruchamia Firefox w trybie headless
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--remote-debugging-port=9222")
 
-    # Inicjalizacja undetected_chromedriver
-    driver = uc.Chrome(options=options)
+    # Inicjalizacja GeckoDriver dla Firefoxa
+    driver = webdriver.Firefox(options=options)
     return driver
 
 # Funkcja logowania do epstryk.pl
