@@ -57,13 +57,24 @@ def scrape_product_data(driver, product_url):
     time.sleep(2)
     
     # Pobieranie danych produktu
-    product_name = driver.find_element(By.CSS_SELECTOR, ".productCardMain__name.header.-h1.grow").text
-    product_code = driver.find_element(By.CSS_SELECTOR, ".productParam__value.productParam__value--normal").text
-    catalog_price = driver.find_elements(By.CSS_SELECTOR, ".productParam__value.productParam__value--normal")[1].text
-    your_price = driver.find_element(By.CSS_SELECTOR, ".productParam__value.-bold.productParam__value--big").text
-    image_url = driver.find_element(By.CSS_SELECTOR, ".productFoto__zoom img").get_attribute("src")
+def scrape_product_data(driver, product_url):
+    print(f"Pobieranie danych z {product_url}...")
+    driver.get(product_url)
     
-    print("Dane produktu pobrane pomyślnie.")
+    # Czekanie na widoczność nazwy produktu
+    try:
+        product_name = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, ".productCardMain__name.header.-h1.grow"))
+        ).text
+        product_code = driver.find_element(By.CSS_SELECTOR, ".productParam__value.productParam__value--normal").text
+        catalog_price = driver.find_elements(By.CSS_SELECTOR, ".productParam__value.productParam__value--normal")[1].text
+        your_price = driver.find_element(By.CSS_SELECTOR, ".productParam__value.-bold.productParam__value--big").text
+        image_url = driver.find_element(By.CSS_SELECTOR, ".productFoto__zoom img").get_attribute("src")
+        
+        print("Dane produktu pobrane pomyślnie.")
+    except Exception as e:
+        print(f"Błąd podczas pobierania danych produktu: {e}")
+        return None
 
     return {
         "name": product_name,
