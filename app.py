@@ -3,7 +3,10 @@ from dotenv import load_dotenv
 import os
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.by import By  # Dodany brakujący import
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 
 app = Flask(__name__)
@@ -24,18 +27,26 @@ def start_webdriver():
     driver = webdriver.Firefox(options=options)
     return driver
 
-# Funkcja logowania do epstryk.pl
+# Funkcja logowania do epstryk.pl z przewijaniem i najechaniem na elementy
 def login_to_epstryk(driver):
     print("Logowanie do epstryk.pl...")
-    driver.get("https://epstryk.pl/pl/login")
-    time.sleep(2)
+    driver.get("https://epstryk.pl/pl/order/login.html")
     
-    # Wprowadzenie danych logowania
-    driver.find_element(By.ID, "login_field").send_keys(username)
-    driver.find_element(By.ID, "password_field").send_keys(password)
-    driver.find_element(By.NAME, "commit").click()
-    time.sleep(2)
+    # Czekanie na widoczność i przewinięcie do pola login
+    WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, "login")))
+    email_field = driver.find_element(By.NAME, "login")
+    password_field = driver.find_element(By.NAME, "password")
+    login_button = driver.find_element(By.XPATH, "//button[contains(text(),'Zaloguj się')]")
+    
+    # Przewinięcie do pola login i wprowadzenie danych
+    actions = ActionChains(driver)
+    actions.move_to_element(email_field).click().perform()
+    email_field.send_keys(username)
+    password_field.send_keys(password)
+    login_button.click()
+    
     print("Zalogowano pomyślnie.")
+    time.sleep(2)  # Oczekiwanie na pełne załadowanie strony po zalogowaniu
 
 # Funkcja scrapująca dane produktu z epstryk.pl
 def scrape_product_data(driver, product_url):
