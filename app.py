@@ -16,15 +16,15 @@ load_dotenv()
 username = os.getenv("EPSTRYK_LOGIN")
 password = os.getenv("EPSTRYK_PASSWORD")
 
-# Funkcja inicjująca przeglądarkę Firefox w trybie headless
+# Funkcja inicjująca przeglądarkę Chrome w trybie headless
 def start_webdriver():
-    options = Options()
-    options.add_argument("--headless")  # Uruchamia Firefox w trybie headless
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")  # Uruchamia Chrome w trybie headless
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    print("Inicjalizacja przeglądarki Firefox...")
-    driver = webdriver.Firefox(options=options)
+    print("Inicjalizacja przeglądarki Chrome...")
+    driver = webdriver.Chrome(options=options)
     print("Przeglądarka uruchomiona.")
     return driver
 
