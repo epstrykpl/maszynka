@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,33 +18,30 @@ password = os.getenv("EPSTRYK_PASSWORD")
 
 # Funkcja inicjująca przeglądarkę Chrome w trybie headless
 def start_webdriver():
-    options = webdriver.ChromeOptions()
+    options = Options()
     options.add_argument("--headless")  # Uruchamia Chrome w trybie headless
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
     print("Inicjalizacja przeglądarki Chrome...")
     driver = webdriver.Chrome(options=options)
-    print("Przeglądarka uruchomiona.")
+    print("Przeglądarka Chrome uruchomiona.")
     return driver
 
-# Funkcja logowania do epstryk.pl z przewijaniem i najechaniem na elementy
+# Funkcja logowania do epstryk.pl
 def login_to_epstryk(driver):
     print("Logowanie do epstryk.pl...")
     driver.get("https://epstryk.pl/pl/order/login.html")
     print("Strona logowania załadowana.")
     
     try:
-        # Czekanie na widoczność i przewinięcie do pola login
         WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, "login")))
         email_field = driver.find_element(By.NAME, "login")
         password_field = driver.find_element(By.NAME, "password")
         print("Pola logowania dostępne.")
 
-        # Czekanie na przycisk logowania i kliknięcie
+        # Wprowadzenie danych logowania
         login_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='submit']")))
-        
-        # Przewinięcie do pola login i wprowadzenie danych
         actions = ActionChains(driver)
         actions.move_to_element(email_field).click().perform()
         email_field.send_keys(username)
@@ -56,16 +53,16 @@ def login_to_epstryk(driver):
     except Exception as e:
         print(f"Błąd podczas logowania: {e}")
 
-# Funkcja scrapująca dane produktu z epstryk.pl
+# Funkcja scrapująca dane produktu
 def scrape_product_data(driver, product_url):
     print(f"Pobieranie danych z {product_url}...")
     driver.get(product_url)  # Ponowne załadowanie strony po zalogowaniu
     
-    # Czekanie na widoczność nazwy produktu
     try:
         product_name = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, ".productCardMain__name.header.-h1.grow"))
         ).text
+        print("Nazwa produktu pobrana.")
         product_code = driver.find_element(By.CSS_SELECTOR, ".productParam__value.productParam__value--normal").text
         catalog_price = driver.find_elements(By.CSS_SELECTOR, ".productParam__value.productParam__value--normal")[1].text
         your_price = driver.find_element(By.CSS_SELECTOR, ".productParam__value.-bold.productParam__value--big").text
@@ -92,6 +89,7 @@ def index():
         # Inicjalizacja Selenium i pobieranie danych
         print("Rozpoczynanie pracy z Selenium...")
         driver = start_webdriver()
+        product_data = None
         try:
             login_to_epstryk(driver)
             print("Przechodzenie do strony produktu po zalogowaniu.")
