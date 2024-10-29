@@ -36,7 +36,9 @@ def login_to_epstryk(driver):
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, "login")))
     email_field = driver.find_element(By.NAME, "login")
     password_field = driver.find_element(By.NAME, "password")
-    login_button = driver.find_element(By.XPATH, "//button[contains(text(),'Zaloguj się')]")
+    
+    # Czekanie na przycisk logowania i kliknięcie
+    login_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='submit']")))
     
     # Przewinięcie do pola login i wprowadzenie danych
     actions = ActionChains(driver)
