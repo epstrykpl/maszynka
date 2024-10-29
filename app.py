@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.by import By
+from selenium.webdriver.common.by import By  # Dodany brakujący import
 import time
 
 app = Flask(__name__)
