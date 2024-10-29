@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import os
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+import undetected_chromedriver as uc
 import time
 
 app = Flask(__name__)
@@ -14,15 +13,15 @@ password = os.getenv("EPSTRYK_PASSWORD")
 
 # Funkcja inicjująca przeglądarkę Chrome w trybie headless
 def start_webdriver():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Uruchamia Chrome w trybie headless
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")  # Zwiększa stabilność w trybie headless
-    chrome_options.add_argument("--remote-debugging-port=9222")  # DevTools dla stabilności
+    options = uc.ChromeOptions()
+    options.add_argument("--headless")  # Tryb headless
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--remote-debugging-port=9222")
 
-    # Inicjalizacja Chrome w trybie headless
-    driver = webdriver.Chrome(options=chrome_options)
+    # Inicjalizacja undetected_chromedriver
+    driver = uc.Chrome(options=options)
     return driver
 
 # Funkcja logowania do epstryk.pl
@@ -34,7 +33,7 @@ def login_to_epstryk(driver):
     driver.find_element(By.ID, "login_field").send_keys(username)
     driver.find_element(By.ID, "password_field").send_keys(password)
     driver.find_element(By.NAME, "commit").click()
-    time.sleep(2)  # Oczekiwanie na zalogowanie
+    time.sleep(2)
 
 # Funkcja scrapująca dane produktu z epstryk.pl
 def scrape_product_data(driver, product_url):
