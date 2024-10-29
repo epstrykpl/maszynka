@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.by import By
 import time
 
 app = Flask(__name__)
@@ -19,12 +20,13 @@ def start_webdriver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    # Inicjalizacja GeckoDriver dla Firefoxa
+    print("Inicjalizacja przeglądarki Firefox...")
     driver = webdriver.Firefox(options=options)
     return driver
 
 # Funkcja logowania do epstryk.pl
 def login_to_epstryk(driver):
+    print("Logowanie do epstryk.pl...")
     driver.get("https://epstryk.pl/pl/login")
     time.sleep(2)
     
@@ -33,9 +35,11 @@ def login_to_epstryk(driver):
     driver.find_element(By.ID, "password_field").send_keys(password)
     driver.find_element(By.NAME, "commit").click()
     time.sleep(2)
+    print("Zalogowano pomyślnie.")
 
 # Funkcja scrapująca dane produktu z epstryk.pl
 def scrape_product_data(driver, product_url):
+    print(f"Pobieranie danych z {product_url}...")
     driver.get(product_url)
     time.sleep(2)
     
@@ -45,6 +49,8 @@ def scrape_product_data(driver, product_url):
     catalog_price = driver.find_elements(By.CSS_SELECTOR, ".productParam__value.productParam__value--normal")[1].text
     your_price = driver.find_element(By.CSS_SELECTOR, ".productParam__value.-bold.productParam__value--big").text
     image_url = driver.find_element(By.CSS_SELECTOR, ".productFoto__zoom img").get_attribute("src")
+    
+    print("Dane produktu pobrane pomyślnie.")
 
     return {
         "name": product_name,
@@ -78,8 +84,10 @@ def index():
         </div>
         """
         
+        print("Kod HTML wygenerowany pomyślnie.")
         return render_template("index.html", product_data=product_data, html_code=html_code)
     
+    print("Ładowanie strony głównej...")
     return render_template("index.html")
 
 if __name__ == '__main__':
