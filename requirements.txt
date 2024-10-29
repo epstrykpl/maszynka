@@ -1,4 +1,3 @@
 Flask
 selenium
 python-dotenv
-undetected-chromedriver
