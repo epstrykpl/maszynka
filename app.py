@@ -53,13 +53,7 @@ def login_to_epstryk(driver):
 # Funkcja scrapująca dane produktu z epstryk.pl
 def scrape_product_data(driver, product_url):
     print(f"Pobieranie danych z {product_url}...")
-    driver.get(product_url)
-    time.sleep(2)
-    
-    # Pobieranie danych produktu
-def scrape_product_data(driver, product_url):
-    print(f"Pobieranie danych z {product_url}...")
-    driver.get(product_url)
+    driver.get(product_url)  # Ponowne załadowanie strony po zalogowaniu
     
     # Czekanie na widoczność nazwy produktu
     try:
@@ -93,6 +87,7 @@ def index():
         driver = start_webdriver()
         try:
             login_to_epstryk(driver)
+            driver.get(product_url)  # Po zalogowaniu ponownie załaduj stronę produktu
             product_data = scrape_product_data(driver, product_url)
         finally:
             driver.quit()
